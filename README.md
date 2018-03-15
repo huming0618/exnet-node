@@ -9,3 +9,7 @@
 - depth: ok_sub_spot_X_depth 
 - market depth: ok_sub_spot_X_depth_Y 
 - deals: ok_sub_spot_X_deals 
+
+### Dependency
+- https://github.com/websockets/ws
+- https://github.com/TooTallNate/node-https-proxy-agent
