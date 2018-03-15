@@ -61,9 +61,9 @@ const startWatchList = (list)=>{
     
         }
         else {
-            console.log((new Date()).toDateString());
+            //console.log((new Date()).toDateString());
             console.log(data);
-            console.log('......................');
+            //console.log('......................');
         }
     });
 }

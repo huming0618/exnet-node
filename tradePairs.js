@@ -1,13 +1,15 @@
+const request = require('request');
 // https://www.okex.com/v2/spot/markets/currencies
 
-const https = require('https');
+// const https = require('https');
 
-https.globalAgent.options.secureProtocol = 'SSLv3_method';
+// https.globalAgent.options.secureProtocol = 'SSLv3_method';
+
 const OK_URL = "https://www.okex.com/v2/spot/markets/currencies";
 
 //const proxy = process.env.HTTP_PROXY;
 //HTTP_PROXY=http://127.0.0.1:1087 node tradePairs.js
-const request = require('request');
+
 
 const load = (callback)=>{
     request(OK_URL, function (error, response, body) {
