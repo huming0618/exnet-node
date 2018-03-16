@@ -66,6 +66,11 @@ const startWatchList = (list)=>{
             //console.log('......................');
         }
     });
+
+    socket.on('close', ()=>{
+        console.log('closed')
+        console.log((new Date()));
+    });
 }
 
 module.exports = startWatchList;
