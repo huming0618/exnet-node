@@ -9,7 +9,7 @@ const loadPairs = require('./tradePairs');
 const proxy = process.env.HTTP_PROXY;
 
 const endpoint = "wss://real.okex.com:10441/websocket";
-const parsed = url.parse(endpoint);
+//const parsed = url.parse(endpoint);
 
 const PING_MSG = appUtil.PING_MSG;
 const PONG_MSG = appUtil.PONG_MSG;
