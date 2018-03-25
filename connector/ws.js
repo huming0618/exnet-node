@@ -21,8 +21,13 @@ const EVENT_HEARTBEAT_TIMEOUT = "EVENT_HEARTBEAT_TIMEOUT";
 
 const defaultOptions = {
     agent: null,
-    hearbeatInterval: 30000,
-    heartbeatTimeout: 3000
+    hearbeatInterval: 10000,
+    heartbeatTimeout: 300
+}
+
+
+const log = (msg)=>{
+	console.log.bind(console, new Date())(msg);
 }
 
 class WSConnector extends EventEmitter{
@@ -36,9 +41,10 @@ class WSConnector extends EventEmitter{
         this.endpoint.on('message', (data, flags) => {
             console.log('data', data);
             if (data === PONG_MSG){
-                console.log('pong');
                 const duration = Date.now() - this.sendPingTS;
                 this.emit(EVENT_HEARTBEAT, duration);
+		log(`Received Pong. Delay -  ${duration}`);
+		console.log('');
                 this.latestPong = PONG_MSG;
             }
             else {
@@ -47,8 +53,8 @@ class WSConnector extends EventEmitter{
         });
 
         this.endpoint.on('open', ()=>{
-            console.log('OPEN', options.hearbeatIntterval);
-            setInterval(this.keepAlive.bind(this), options.hearbeatIntterval);
+            console.log('OPEN');
+            setInterval(this.keepAlive.bind(this), options.hearbeatInterval);
         })
 
         this.endpoint.on('error', ()=>{
@@ -82,7 +88,7 @@ class WSConnector extends EventEmitter{
         this.sendPingTS = Date.now();
         this.endpoint.send(PING_MSG);
         //console.log('PING');
-
+   	log('PING');
         setTimeout(()=>{
             const nowTS = Date.now();
             if (this.latestPong){
