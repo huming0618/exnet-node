@@ -21,15 +21,15 @@ const EVENT_HEARTBEAT_TIMEOUT = "EVENT_HEARTBEAT_TIMEOUT";
 
 const defaultOptions = {
     agent: null,
-    hearbeatInterval: 10000,
-    heartbeatTimeout: 300
+    hearbeatInterval: 30000,
+    heartbeatTimeout: 3000
 }
 
 class WSConnector extends EventEmitter{
 
-    constructor(wsURL, options){
+    constructor(wsURL, theOptions){
         super();
-        this.options = Object.assign({} || options, defaultOptions);
+        const options = this.options = Object.assign({} || theOptions, defaultOptions);
         
         this.endpoint = new WebSocket(wsURL, options);
 
@@ -47,8 +47,12 @@ class WSConnector extends EventEmitter{
         });
 
         this.endpoint.on('open', ()=>{
-            console.log('OPEN');
-            setInterval(this.keepAlive.bind(this), options.hearbeatInterval);
+            console.log('OPEN', options.hearbeatIntterval);
+            setInterval(this.keepAlive.bind(this), options.hearbeatIntterval);
+        })
+
+        this.endpoint.on('error', ()=>{
+            console.error('ERROR');
         })
         
     }
@@ -77,12 +81,14 @@ class WSConnector extends EventEmitter{
         this.latestPong = null;
         this.sendPingTS = Date.now();
         this.endpoint.send(PING_MSG);
+        //console.log('PING');
 
         setTimeout(()=>{
             const nowTS = Date.now();
             if (this.latestPong){
             }
             else {
+               // console.log(EVENT_HEARTBEAT_TIMEOUT);
                 this.emit(EVENT_HEARTBEAT_TIMEOUT);
             }
         }, this.options.heartbeatTimeout);
