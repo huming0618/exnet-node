@@ -1,8 +1,4 @@
 const request = require('request');
-// https://www.okex.com/v2/spot/markets/currencies
-
-// const https = require('https');
-
 // https.globalAgent.options.secureProtocol = 'SSLv3_method';
 
 const OK_URL = "https://www.okex.com/v2/spot/markets/currencies";

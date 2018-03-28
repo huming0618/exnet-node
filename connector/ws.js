@@ -43,8 +43,8 @@ class WSConnector extends EventEmitter{
             if (data === PONG_MSG){
                 const duration = Date.now() - this.sendPingTS;
                 this.emit(EVENT_HEARTBEAT, duration);
-		log(`Received Pong. Delay -  ${duration}`);
-		console.log('');
+                log(`Received Pong. Delay -  ${duration}`);
+                console.log('');
                 this.latestPong = PONG_MSG;
             }
             else {
@@ -57,8 +57,8 @@ class WSConnector extends EventEmitter{
             setInterval(this.keepAlive.bind(this), options.hearbeatInterval);
         })
 
-        this.endpoint.on('error', ()=>{
-            console.error('ERROR');
+        this.endpoint.on('error', (e)=>{
+            console.error('ERROR', e);
         })
         
     }
@@ -88,7 +88,7 @@ class WSConnector extends EventEmitter{
         this.sendPingTS = Date.now();
         this.endpoint.send(PING_MSG);
         //console.log('PING');
-   	log('PING');
+   	    log('PING');
         setTimeout(()=>{
             const nowTS = Date.now();
             if (this.latestPong){
