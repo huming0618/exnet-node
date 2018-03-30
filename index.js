@@ -7,7 +7,6 @@ let pairs = [];
 (async ()=>{
     try{
         pairs = await loadPairs();
-        //console.log('paris', pairs[0]);
         startWatch(pairs)
     }
     catch(e){

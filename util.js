@@ -1,7 +1,7 @@
 const util = {};
 
 util.PING_MSG = "{'event':'ping'}";
-util.PONG_MSG = "{'event':'pong'}";
+util.PONG_MSG = '{"event":"pong"}';
 
 util.SYMBOL_USDT = "usdt";
 util.SYMBOL_BTC = "btc";
