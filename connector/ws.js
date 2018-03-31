@@ -1,6 +1,7 @@
 
 const setTimeout = require('timers').setTimeout;
 const setInterval = require('timers').setInterval;
+const clearInterval = require('timers').clearInterval;
 const EventEmitter = require('events').EventEmitter;
 const url = require('url');
 
@@ -33,7 +34,7 @@ const EVENT_HEARTBEAT_TIMEOUT = "heartbeatTimeout";
 
 const defaultOptions = {
     agent: null,
-    hearbeatInterval: 30000,
+    hearbeatInterval: 15000,
     heartbeatTimeout: 300
 }
 
@@ -42,6 +43,8 @@ class WSConnector extends EventEmitter{
     constructor(wsURL, theOptions){
         super();
         const options = this.options = Object.assign({} || theOptions, defaultOptions);
+        let keepAliveTimer = null;
+
         this.endpoint = new WebSocket(wsURL, options);
 
         this.endpoint.on('message', (data, flags) => {
@@ -60,10 +63,11 @@ class WSConnector extends EventEmitter{
         this.endpoint.on('open', ()=>{
             this.emit('open');
             logger.debug('OPENED');
-            setInterval(this.keepAlive.bind(this), options.hearbeatInterval);
+            keepAliveTimer = setInterval(this.keepAlive.bind(this), options.hearbeatInterval);
         })
 
         this.endpoint.on('close', (e)=>{
+            clearInterval(keepAliveTimer);
             this.emit('close');
             logger.debug('CLOSED');
         });

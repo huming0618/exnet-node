@@ -54,7 +54,7 @@ const startWatchList = (list)=>{
     });
 
     ws.on('close', ()=>{
-        console.log('closed');
+        //console.log('closed');
     });
 }
 
