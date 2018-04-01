@@ -40,7 +40,8 @@ const startWatchList = (list)=>{
     const MONITOR_LIST = [];
 
     const ws = new wsConnector(endpoint, options);
-
+    ws.connect();
+    
     list.forEach(item=>{
         fillSubscribeList(MONITOR_LIST, item);
     });
@@ -55,6 +56,7 @@ const startWatchList = (list)=>{
 
     ws.on('close', ()=>{
         //console.log('closed');
+        //ws.reConnect();
     });
 }
 

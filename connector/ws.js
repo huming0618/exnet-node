@@ -35,17 +35,37 @@ const EVENT_HEARTBEAT_TIMEOUT = "heartbeatTimeout";
 const defaultOptions = {
     agent: null,
     hearbeatInterval: 15000,
-    heartbeatTimeout: 300
+    heartbeatTimeout: 300,
+    reconnectTimeout: 450
 }
 
 class WSConnector extends EventEmitter{
 
     constructor(wsURL, theOptions){
+        logger.debug('OPENING');
         super();
-        const options = this.options = Object.assign({} || theOptions, defaultOptions);
-        let keepAliveTimer = null;
+        this.wsURL = wsURL;
+        this.options = Object.assign({} || theOptions, defaultOptions);
+        this.reconnectTimer = null;
+    }
 
-        this.endpoint = new WebSocket(wsURL, options);
+    reconnect(){
+        let reconnectTimer = null;
+        this.endpoint.terminate();
+        logger.debug('TO_RECONNECT', this.endpoint.readyState);
+        if (WebSocket.CLOSED === this.endpoint.readyState){
+            reconnectTimer = setInterval(()=>{
+                logger.debug('TRY_RECONNECT');
+                this.connect();
+            }, this.options.reconnectTimeout);
+        }
+    }
+
+    connect(){
+        let keepAliveTimer = null;
+        const options = this.options;
+
+        this.endpoint = new WebSocket(this.wsURL, options);
 
         this.endpoint.on('message', (data, flags) => {
             if (data === PONG_MSG){
@@ -61,6 +81,10 @@ class WSConnector extends EventEmitter{
         });
 
         this.endpoint.on('open', ()=>{
+            if (this.reconnectTimer !== null){
+                clearInterval(this.reconnectTimer);
+                this.reconnectTimer = null;
+            }
             this.emit('open');
             logger.debug('OPENED');
             keepAliveTimer = setInterval(this.keepAlive.bind(this), options.hearbeatInterval);
@@ -70,13 +94,14 @@ class WSConnector extends EventEmitter{
             clearInterval(keepAliveTimer);
             this.emit('close');
             logger.debug('CLOSED');
+            options.reconnectTimeout > 0 && this.reconnect();
         });
 
         this.endpoint.on('error', (e)=>{
             this.emit('error');
             logger.debug('ERROR', e);
+            options.reconnectTimeout > 0 && this.reconnect();
         });
-        
     }
 
     sendBatchMessages(msgList){
@@ -115,6 +140,8 @@ class WSConnector extends EventEmitter{
             if (this.latestPong === null){
                 this.emit(EVENT_HEARTBEAT_TIMEOUT);
                 logger.debug('HEARTBEAT_TIMEOUT');
+                //this.endpoint.close(1000);
+                this.reconnect();
             }
         }, this.options.heartbeatTimeout);
     }
