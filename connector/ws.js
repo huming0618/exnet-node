@@ -36,7 +36,7 @@ const defaultOptions = {
     agent: null,
     hearbeatInterval: 15000,
     heartbeatTimeout: 300,
-    reconnectTimeout: 450
+    reconnectTimeout: 30000
 }
 
 class WSConnector extends EventEmitter{
@@ -47,26 +47,41 @@ class WSConnector extends EventEmitter{
         this.wsURL = wsURL;
         this.options = Object.assign({} || theOptions, defaultOptions);
         this.reconnectTimer = null;
+        this.keepAliveTimer = null;
+    }
+
+    isConnecting(){
+        return this.endpoint.readyState === WebSocket.CONNECTING;
+    }
+
+    isOpened(){
+        return this.endpoint.readyState === WebSocket.OPEN;
+    }
+
+    isClosing(){
+        return this.endpoint.readyState === WebSocket.CLOSING;
+    }
+
+    isClosed(){
+        return this.endpoint.readyState === WebSocket.CLOSED;
     }
 
     reconnect(){
-        let reconnectTimer = null;
+        clearInterval(this.keepAliveTimer);
         logger.debug('TO_RECONNECT', this.endpoint.readyState);
         if (WebSocket.CLOSED !== this.endpoint.readyState){
+            console.log('try to terminate');
             this.endpoint.terminate();
         }
-        process.nextTick(()=>{
-            reconnectTimer = setInterval(()=>{
-                logger.debug('TRY_RECONNECT');
-                this.connect();
-            }, this.options.reconnectTimeout);
-        })
+        this.reconnectTimer = setInterval(()=>{
+            logger.debug('TO_RECONNECT');
+            this.connect();
+            console.log('Re-Connected', );
+        }, this.options.reconnectTimeout);
     }
 
     connect(){
-        let keepAliveTimer = null;
         const options = this.options;
-
         this.endpoint = new WebSocket(this.wsURL, options);
 
         this.endpoint.on('message', (data, flags) => {
@@ -83,26 +98,27 @@ class WSConnector extends EventEmitter{
         });
 
         this.endpoint.on('open', ()=>{
+            logger.debug('OPENED');
+            console.log('OPENED', this.endpoint.readyState);
             if (this.reconnectTimer !== null){
                 clearInterval(this.reconnectTimer);
+                console.log('clear reconnectTimer');
                 this.reconnectTimer = null;
             }
             this.emit('open');
-            logger.debug('OPENED');
-            keepAliveTimer = setInterval(this.keepAlive.bind(this), options.hearbeatInterval);
+            
+            this.keepAliveTimer = setInterval(this.keepAlive.bind(this), options.hearbeatInterval);
         })
 
         this.endpoint.on('close', (e)=>{
-            clearInterval(keepAliveTimer);
-            this.emit('close');
             logger.debug('CLOSED');
-            options.reconnectTimeout > 0 && this.reconnect();
+            clearInterval(this.keepAliveTimer);
+            this.emit('close');
         });
 
         this.endpoint.on('error', (e)=>{
-            this.emit('error');
             logger.debug('ERROR', e);
-            options.reconnectTimeout > 0 && this.reconnect();
+            this.emit('wss.error', e);
         });
     }
 
@@ -143,11 +159,11 @@ class WSConnector extends EventEmitter{
                 this.emit(EVENT_HEARTBEAT_TIMEOUT);
                 logger.debug('HEARTBEAT_TIMEOUT');
                 //this.endpoint.close(1000);
+                clearInterval(this.keepAliveTimer);
                 this.reconnect();
             }
         }, this.options.heartbeatTimeout);
     }
-
 }
 
 module.exports = WSConnector;

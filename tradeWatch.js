@@ -8,6 +8,7 @@ const wsConnector = require('./connector/ws');
 // HTTP/HTTPS proxy to connect to
 const proxy = process.env.HTTP_PROXY;
 
+//47.90.109.236
 const endpoint = "wss://real.okex.com:10441/websocket";
 //const parsed = url.parse(endpoint);
 
@@ -55,9 +56,17 @@ const startWatchList = (list)=>{
     });
 
     ws.on('close', ()=>{
-        //console.log('closed');
-        //ws.reConnect();
+        ws.reconnect();
     });
+
+    ws.on('wss.close', ()=>{
+        ws.reconnect();
+    });
+
+    ws.on('heartbeatTimeout', ()=>{
+        // console.log('heartbeat.timeout');
+        // ws.connect();
+    })
 }
 
 module.exports = startWatchList;
