@@ -36,7 +36,7 @@ const defaultOptions = {
     agent: null,
     hearbeatInterval: 15000,
     heartbeatTimeout: 300,
-    reconnectTimeout: 5000
+    reconnectTimeout: 9000
 }
 
 class WSConnector extends EventEmitter{
@@ -68,15 +68,15 @@ class WSConnector extends EventEmitter{
 
     reconnect(){
         clearInterval(this.keepAliveTimer);
-        logger.debug('TO_RECONNECT', this.endpoint.readyState);
+        logger.debug('TRY_TO_RECONNECT', this.endpoint.readyState);
         if (WebSocket.CLOSED !== this.endpoint.readyState){
-            console.log('try to terminate');
+            logger.debug('try to terminate');
+            this.endpoint.removeAllListeners('close');
             this.endpoint.terminate();
         }
         this.reconnectTimer = setInterval(()=>{
             logger.debug('TO_RECONNECT');
             this.connect();
-            console.log('Re-Connected', );
         }, this.options.reconnectTimeout);
     }
 
@@ -131,6 +131,7 @@ class WSConnector extends EventEmitter{
     sendMessage(msg, waitReplyTimeout){
         this.latestReply = null;
         this.endpoint.send(msg);
+        logger.debug('SENDMSG', msg.length);
         return new Promise((resolve, reject)=>{
             if (!waitReplyTimeout) {
                 resolve();

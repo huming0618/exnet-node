@@ -55,7 +55,7 @@ const startWatchList = (list)=>{
         console.log(data);
     });
 
-    ws.on('close', ()=>{
+    ws.on('error', ()=>{
         ws.reconnect();
     });
 
