@@ -36,7 +36,7 @@ const defaultOptions = {
     agent: null,
     hearbeatInterval: 15000,
     heartbeatTimeout: 300,
-    reconnectTimeout: 30000
+    reconnectTimeout: 5000
 }
 
 class WSConnector extends EventEmitter{
