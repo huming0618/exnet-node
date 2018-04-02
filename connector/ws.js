@@ -51,14 +51,16 @@ class WSConnector extends EventEmitter{
 
     reconnect(){
         let reconnectTimer = null;
-        this.endpoint.terminate();
         logger.debug('TO_RECONNECT', this.endpoint.readyState);
-        if (WebSocket.CLOSED === this.endpoint.readyState){
+        if (WebSocket.CLOSED !== this.endpoint.readyState){
+            this.endpoint.terminate();
+        }
+        process.nextTick(()=>{
             reconnectTimer = setInterval(()=>{
                 logger.debug('TRY_RECONNECT');
                 this.connect();
             }, this.options.reconnectTimeout);
-        }
+        })
     }
 
     connect(){
