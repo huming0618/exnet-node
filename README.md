@@ -13,3 +13,4 @@
 ### Dependency
 - https://github.com/websockets/ws
 - https://github.com/TooTallNate/node-https-proxy-agent
+- https://github.com/ozra/mmap-io
