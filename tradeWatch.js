@@ -1,9 +1,10 @@
 const url = require('url');
-const WebSocket = require('ws');
+const pg = require('pg');
 const HttpsProxyAgent = require('https-proxy-agent');
 
 const appUtil = require('./util');
 const wsConnector = require('./connector/ws');
+const createTableSQL = require('./createtable.sql');
 
 // HTTP/HTTPS proxy to connect to
 const proxy = process.env.HTTP_PROXY;
@@ -16,6 +17,14 @@ const PING_MSG = appUtil.PING_MSG;
 const PONG_MSG = appUtil.PONG_MSG;
 
 const options = {};
+
+const DB_USER = 'postgres';
+const DB_PWD = 'nhn!23nhn';
+const DB_SERVER = 'localhost:5432/liuda';
+
+const pgConfig = `pg://${DB_USER}:${DB_PWD}@${DB_SERVER}`;
+const pgClient = new pg.Client(pgConfig);
+const TABLE_NAME = createTableSQL.table;
 
 if (proxy){
     const agent = new HttpsProxyAgent(url.parse(proxy));
@@ -37,10 +46,14 @@ const fillSubscribeList = (list, target)=>{
     list.push(appUtil.getSubscribeMessageForDeals(target, appUtil.SYMBOL_ETH));
 }
 
-const startWatchList = (list)=>{
+const startWatchList = async (list)=>{
     const MONITOR_LIST = [];
+    await pgClient.connect();
 
     const ws = new wsConnector(endpoint, options);
+    const result = await pgClient.query(createTableSQL.sql);
+    console.log('DB Init');
+
     ws.connect();
     
     list.forEach(item=>{
@@ -52,7 +65,9 @@ const startWatchList = (list)=>{
     });
 
     ws.on('data', (data)=>{
-        console.log(data);
+        //console.log(data);
+        const insertQuery = `INSERT INTO ${TABLE_NAME}(detail,ts) VALUES('${data}', NOW())`;
+        pgClient.query(insertQuery);
     });
 
     ws.on('wss.error', ()=>{
