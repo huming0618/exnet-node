@@ -7,11 +7,11 @@ let pairs = [];
 (async ()=>{
     try{
         pairs = await loadPairs();
-        startWatch(pairs)
+        //console.log(pairs.pop());
+        startWatch(pairs);
     }
     catch(e){
         console.log(e);
         console.log('Failed to get the pairs');
     }
-
 })();

@@ -1,4 +1,6 @@
 const request = require('request');
+const fs = require('fs');
+
 // https.globalAgent.options.secureProtocol = 'SSLv3_method';
 
 //104.25.20.25
@@ -17,7 +19,11 @@ const load = (callback)=>{
             if (response && response.statusCode){
                 if (typeof body === 'string'){
                     const result = JSON.parse(body);
-                    callback(null, result.data.map(x=>x.symbol.toLowerCase()))
+                    let list = result.data.map(x=>x.symbol.toLowerCase());
+                    if (fs.existsSync('more_symbol.list')){
+                        list = list.concat(fs.readFileSync('more_symbol.list').toString().split("\n"));
+                    }
+                    callback(null, new Set(list))
                 }
             }
             else {
