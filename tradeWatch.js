@@ -18,13 +18,13 @@ const PONG_MSG = appUtil.PONG_MSG;
 
 const options = {};
 
-const DB_USER = 'postgres';
-const DB_PWD = 'nhn!23nhn';
-const DB_SERVER = 'localhost:5432/liuda';
+const DB_USER = '';
+const DB_PWD = '';
+const DB_SERVER = '';
 
-const pgConfig = `pg://${DB_USER}:${DB_PWD}@${DB_SERVER}`;
-const pgClient = new pg.Client(pgConfig);
-const TABLE_NAME = createTableSQL.table;
+// const pgConfig = `pg://${DB_USER}:${DB_PWD}@${DB_SERVER}`;
+// const pgClient = new pg.Client(pgConfig);
+// const TABLE_NAME = createTableSQL.table;
 
 if (proxy){
     const agent = new HttpsProxyAgent(url.parse(proxy));
@@ -48,11 +48,11 @@ const fillSubscribeList = (list, target)=>{
 
 const startWatchList = async (list)=>{
     const MONITOR_LIST = [];
-    await pgClient.connect();
+    // await pgClient.connect();
 
     const ws = new wsConnector(endpoint, options);
-    const result = await pgClient.query(createTableSQL.sql);
-    console.log('DB Init');
+    // const result = await pgClient.query(createTableSQL.sql);
+    // console.log('DB Init');
 
     ws.connect();
     
@@ -65,9 +65,9 @@ const startWatchList = async (list)=>{
     });
 
     ws.on('data', (data)=>{
-        //console.log(data);
-        const insertQuery = `INSERT INTO ${TABLE_NAME}(detail,ts) VALUES('${data}', NOW())`;
-        pgClient.query(insertQuery);
+        console.log(data);
+        // const insertQuery = `INSERT INTO ${TABLE_NAME}(detail,ts) VALUES('${data}', NOW())`;
+        // pgClient.query(insertQuery);
     });
 
     ws.on('wss.error', ()=>{
