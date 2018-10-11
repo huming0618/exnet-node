@@ -3,3 +3,4 @@ package-lock.json
 npm-debug.log
 log
 more_symbol.list
+only_symbol.list
