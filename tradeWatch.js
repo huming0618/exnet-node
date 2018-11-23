@@ -1,5 +1,6 @@
 const url = require('url');
 const pg = require('pg');
+const pako = require('pako')
 const HttpsProxyAgent = require('https-proxy-agent');
 
 const appUtil = require('./util');
@@ -65,6 +66,16 @@ const startWatchList = async (list)=>{
     });
 
     ws.on('data', (data)=>{
+        if (data instanceof String){
+            console.log(data);
+        }
+        else {
+            try {
+                console.log(pako.inflateRaw(data, {to: 'string'}))
+            } catch (err) {
+                console.log(err)
+            }
+        }
         console.log(data);
         // const insertQuery = `INSERT INTO ${TABLE_NAME}(detail,ts) VALUES('${data}', NOW())`;
         // pgClient.query(insertQuery);
