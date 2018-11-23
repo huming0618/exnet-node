@@ -76,7 +76,7 @@ const startWatchList = async (list)=>{
                 console.log(err)
             }
         }
-        console.log(data);
+        //console.log(data);
         // const insertQuery = `INSERT INTO ${TABLE_NAME}(detail,ts) VALUES('${data}', NOW())`;
         // pgClient.query(insertQuery);
     });
